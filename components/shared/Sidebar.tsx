@@ -1,16 +1,23 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Home, Settings, BarChart, Menu, X } from "lucide-react"
+import Link from "next/link";
+import {usePathname} from "next/navigation";
+import {useState} from "react";
+import {Home, BarChart, Settings, Users, CreditCard, Menu, X} from "lucide-react";
+
 
 const Sidebar = ()=>{
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   const links = [
-    {icon: Home, label: "Home"},
-    {icon: BarChart, label: "Analytics"},
-    {icon: Settings, label: "Settings"}
-  ]
+  {icon: Home, label: "Home", href: "/dashboard"},
+  {icon: BarChart, label: "Analytics", href: "/dashboard/analytics"},
+  {icon: Settings, label: "Settings", href: "/dashboard/settings"},
+  {icon: Users, label: "Team", href: "/dashboard/team"},
+  {icon: CreditCard, label: "Billing", href: "/dashboard/billing"},
+];
+
 
   return(
     <>
@@ -20,14 +27,18 @@ const Sidebar = ()=>{
           <h1 className="text-gray-900 dark:text-white text-xl font-semibold">SaaSKit</h1>
         </div>
         <nav className="space-y-4">
-          {links.map(({icon:Icon,label})=>(
-            <a 
-              key={label} 
-              href="#" 
-              className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-indigo-500 dark:hover:text-white transition-all duration-200"
+          {links.map(({icon:Icon,label,href})=>(
+            <Link 
+              key={label}
+              href={href}
+              className={`flex items-center gap-3 transition-all duration-200 ${
+                pathname === href
+                  ? "text-indigo-600 dark:text-white font-medium"
+                  : "text-gray-700 dark:text-gray-300 hover:text-indigo-500 dark:hover:text-white"
+              }`}
             >
               <Icon size={20}/> <span>{label}</span>
-            </a>
+            </Link>
           ))}
         </nav>
       </aside>
@@ -57,20 +68,24 @@ const Sidebar = ()=>{
             <X size={20}/>
           </button>
           <nav className="space-y-4">
-            {links.map(({icon:Icon,label})=>(
-              <a
+            {links.map(({icon:Icon,label,href})=>(
+              <Link
                 key={label}
-                href="#"
-                className="flex items-center gap-3 text-gray-700 dark:text-gray-300 hover:text-indigo-500 dark:hover:text-white transition-all duration-200 hover:translate-x-1"
+                href={href}
+                className={`flex items-center gap-3 transition-all duration-200 hover:translate-x-1 ${
+                  pathname === href
+                    ? "text-indigo-600 dark:text-white font-medium"
+                    : "text-gray-700 dark:text-gray-300 hover:text-indigo-500 dark:hover:text-white"
+                }`}
               >
                 <Icon size={20}/> <span>{label}</span>
-              </a>
+              </Link>
             ))}
           </nav>
         </aside>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;
