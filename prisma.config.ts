@@ -1,16 +1,9 @@
-// prisma/prisma.config.ts
-import { PrismaClient } from "@prisma/client";
+import "dotenv/config";
+import { defineConfig } from "@prisma/config";
 
-declare global {
-  // allow global prisma client during development to avoid multiple instances
-  // eslint-disable-next-line no-var
-  var prisma: PrismaClient | undefined;
-}
-
-export const prisma =
-  global.prisma ||
-  new PrismaClient({
-    log: ["query", "info", "warn", "error"],
-  });
-
-if (process.env.NODE_ENV !== "production") global.prisma = prisma;
+export default defineConfig({
+  schema: "./prisma/schema.prisma",
+  output: {
+    client: "./node_modules/.prisma/client",
+  },
+});
