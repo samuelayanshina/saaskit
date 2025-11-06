@@ -1,24 +1,24 @@
-import type {Metadata} from "next";
-import {Geist, Geist_Mono} from "next/font/google";
-import "./globals.css";
-import {ThemeProvider} from "@/components/providers/ThemeProvider";
+import type {Metadata} from 'next';
+import {Geist, Geist_Mono} from 'next/font/google';
+import './globals.css';
+import ClientLayout from './ClientLayout';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: "SaaSKit Dashboard",
-  description: "A sleek glassmorphic admin dashboard",
+  title: 'SaaSKit Dashboard',
+  description: 'A sleek glassmorphic admin dashboard',
 };
 
-export default function RootLayout({children}: {children: React.ReactNode}) {
+export default function RootLayout({children}:{children:React.ReactNode}){
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -26,15 +26,11 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           ${geistSans.variable} 
           ${geistMono.variable} 
           min-h-screen antialiased
-          bg-white text-black 
-          dark:bg-gray-900 dark:text-white 
-          transition-colors duration-300
+          bg-gray-50 text-gray-900 
+          dark:bg-[#0E0E10] dark:text-gray-100
         `}
       >
-        {/* ✅ ThemeProvider wraps all child components */}
-        <ThemeProvider attribute="class" defaultTheme="dark">
-          {children}
-        </ThemeProvider>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
