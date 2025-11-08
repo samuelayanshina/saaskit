@@ -28,6 +28,17 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+
+/* Smooth background + text transitions */
+html {
+  transition: background-color 0.6s ease, color 0.6s ease;
+}
+
+body {
+  transition: background-color 0.6s ease, color 0.6s ease;
+}
+
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -147,6 +158,21 @@ body::before {
   pointer-events: none;
   z-index: 0;
 }
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.06), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.6s ease-in-out;
+}
+
+.dark body::after {
+  opacity: 1;
+}
+
 
 
 @layer base {
