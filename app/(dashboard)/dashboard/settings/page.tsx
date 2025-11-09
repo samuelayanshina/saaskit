@@ -4,23 +4,37 @@ import {useDebounce} from "use-debounce";
 
 export default function SettingsPage(){
   const [activeTab, setActiveTab] = useState("profile");
-  const [profile, setProfile] = useState({name:"", email:""});
+  const [profile, setProfile] = useState({name: "", email:  ""});
   const [team, setTeam] = useState({name:""});
   const [status, setStatus] = useState("");
   const [debouncedProfile] = useDebounce(profile, 1000);
   const [debouncedTeam] = useDebounce(team, 1000);
 
   useEffect(()=>{
-    const loadData = async()=>{
-      const [userRes, teamRes] = await Promise.all([
-        fetch("/api/users").then((r)=>r.json()),
-        fetch("/api/teams").then((r)=>r.json())
-      ]);
-      setProfile(userRes||{name:"", email:""});
-      setTeam(teamRes||{name:""});
+  const loadData = async()=>{
+    const [userRes, teamRes] = await Promise.all([
+      fetch("/api/users").then((r)=>r.json()).catch(()=>null),
+      fetch("/api/teams").then((r)=>r.json()).catch(()=>null)
+    ]);
+
+    // 🧠 Sanitize user data — fill in missing fields with safe defaults
+    const safeUser = {
+      name: userRes?.name ?? "",
+      email: userRes?.email ?? ""
     };
-    loadData();
-  },[]);
+
+    // 🧠 Sanitize team data — same logic
+    const safeTeam = {
+      name: teamRes?.name ?? ""
+    };
+
+    setProfile(safeUser);
+    setTeam(safeTeam);
+  };
+
+  loadData();
+},[]);
+
 
   useEffect(()=>{
     if(!debouncedProfile.name && !debouncedProfile.email) return;
@@ -79,25 +93,25 @@ export default function SettingsPage(){
       {activeTab==="profile" && (
         <div className="space-y-4 mt-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Name</label>
-            <input
-              type="text"
-              value={profile.name}
-              onChange={(e)=>setProfile({...profile,name:e.target.value})}
-              className="w-full p-3 rounded-md bg-white/5 border border-white/10 text-white"
-              placeholder="Your name"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">Email</label>
-            <input
-              type="email"
-              value={profile.email}
-              onChange={(e)=>setProfile({...profile,email:e.target.value})}
-              className="w-full p-3 rounded-md bg-white/5 border border-white/10 text-white"
-              placeholder="Your email"
-            />
-          </div>
+  <label className="block text-sm text-gray-400 mb-1">Name</label>
+  <input
+    type="text"
+    value={profile.name || ""}
+    onChange={(e)=>setProfile({...profile,name:e.target.value})}
+    className="w-full p-3 rounded-md bg-white/5 border border-white/10 text-white"
+    placeholder="Your name"
+  />
+</div>
+<div>
+  <label className="block text-sm text-gray-400 mb-1">Email</label>
+  <input
+    type="email"
+    value={profile.email || ""}
+    onChange={(e)=>setProfile({...profile,email:e.target.value})}
+    className="w-full p-3 rounded-md bg-white/5 border border-white/10 text-white"
+    placeholder="Your email"
+  />
+</div>
           <p className="text-sm text-gray-400">{status}</p>
         </div>
       )}
