@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, {useState, useEffect} from "react";
 import {
   LineChart,
   Line,
@@ -13,44 +13,96 @@ import {
   Bar,
 } from "recharts";
 
-export default function AnalyticsPage() {
-  // 📊 Mock analytics data
+// 🎯 Animated Counter Component
+function AnimatedCounter({value}:{value:number}) {
+  const [count, setCount] = useState(0);
+  useEffect(()=>{
+    let start = 0;
+    const end = value;
+    const duration = 1000;
+    const step = Math.ceil(end / (duration / 16));
+    const interval = setInterval(()=>{
+      start += step;
+      if(start >= end){
+        start = end;
+        clearInterval(interval);
+      }
+      setCount(start);
+    },16);
+    return ()=>clearInterval(interval);
+  },[value]);
+  return <span>{count.toLocaleString()}</span>;
+}
+
+export default function AnalyticsPage(){
+  // Mock stats + chart data
+  const [stats] = useState({
+    revenue: 12500,
+    users: 876,
+    requests: 3200,
+  });
+
   const revenueData = [
-    { month: "Jan", revenue: 1200 },
-    { month: "Feb", revenue: 1800 },
-    { month: "Mar", revenue: 2500 },
-    { month: "Apr", revenue: 2100 },
-    { month: "May", revenue: 3100 },
-    { month: "Jun", revenue: 4200 },
+    {month: "Jan", revenue: 1200},
+    {month: "Feb", revenue: 1800},
+    {month: "Mar", revenue: 2500},
+    {month: "Apr", revenue: 2100},
+    {month: "May", revenue: 3100},
+    {month: "Jun", revenue: 4200},
   ];
 
   const usersData = [
-    { month: "Jan", users: 80 },
-    { month: "Feb", users: 150 },
-    { month: "Mar", users: 220 },
-    { month: "Apr", users: 190 },
-    { month: "May", users: 260 },
-    { month: "Jun", users: 300 },
+    {month: "Jan", users: 80},
+    {month: "Feb", users: 150},
+    {month: "Mar", users: 220},
+    {month: "Apr", users: 190},
+    {month: "May", users: 260},
+    {month: "Jun", users: 300},
   ];
 
   const apiRequestsData = [
-    { name: "Mon", requests: 4000 },
-    { name: "Tue", requests: 3000 },
-    { name: "Wed", requests: 5000 },
-    { name: "Thu", requests: 4800 },
-    { name: "Fri", requests: 5200 },
-    { name: "Sat", requests: 2500 },
-    { name: "Sun", requests: 3800 },
+    {name: "Mon", requests: 4000},
+    {name: "Tue", requests: 3000},
+    {name: "Wed", requests: 5000},
+    {name: "Thu", requests: 4800},
+    {name: "Fri", requests: 5200},
+    {name: "Sat", requests: 2500},
+    {name: "Sun", requests: 3800},
   ];
 
-  return (
+  return(
     <div className="p-6 space-y-6 bg-transparent backdrop-blur-md rounded-2xl border border-white/10 shadow-lg">
       <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
         Analytics
       </h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue Trend */}
+      {/* 🔹 Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="p-4 bg-white/5 border border-white/10 rounded-xl shadow-md text-center hover:scale-[1.02] transition-transform duration-300">
+          <h2 className="text-sm text-gray-400 mb-1">💰 Total Revenue</h2>
+          <p className="text-2xl font-bold text-white">
+            $<AnimatedCounter value={stats.revenue}/>
+          </p>
+        </div>
+
+        <div className="p-4 bg-white/5 border border-white/10 rounded-xl shadow-md text-center hover:scale-[1.02] transition-transform duration-300">
+          <h2 className="text-sm text-gray-400 mb-1">👥 Active Users</h2>
+          <p className="text-2xl font-bold text-white">
+            <AnimatedCounter value={stats.users}/>
+          </p>
+        </div>
+
+        <div className="p-4 bg-white/5 border border-white/10 rounded-xl shadow-md text-center hover:scale-[1.02] transition-transform duration-300">
+          <h2 className="text-sm text-gray-400 mb-1">⚙️ API Requests Today</h2>
+          <p className="text-2xl font-bold text-white">
+            <AnimatedCounter value={stats.requests}/>
+          </p>
+        </div>
+      </div>
+
+      {/* 🔹 Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+        {/* Revenue Chart */}
         <div className="p-4 bg-white/5 border border-white/10 rounded-xl shadow-lg">
           <h2 className="text-lg font-medium text-gray-200 mb-3">
             Monthly Revenue
@@ -72,13 +124,13 @@ export default function AnalyticsPage() {
                 dataKey="revenue"
                 stroke="#6366F1"
                 strokeWidth={2}
-                dot={{ fill: "#6366F1", strokeWidth: 2, r: 4 }}
+                dot={{fill: "#6366F1", strokeWidth: 2, r: 4}}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Active Users */}
+        {/* Users Chart */}
         <div className="p-4 bg-white/5 border border-white/10 rounded-xl shadow-lg">
           <h2 className="text-lg font-medium text-gray-200 mb-3">
             Active Users
@@ -100,14 +152,14 @@ export default function AnalyticsPage() {
                 dataKey="users"
                 stroke="#10B981"
                 strokeWidth={2}
-                dot={{ fill: "#10B981", strokeWidth: 2, r: 4 }}
+                dot={{fill: "#10B981", strokeWidth: 2, r: 4}}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* API Requests Overview */}
+      {/* 🔹 API Requests Overview */}
       <div className="p-4 bg-white/5 border border-white/10 rounded-xl shadow-lg">
         <h2 className="text-lg font-medium text-gray-200 mb-3">
           API Requests Overview
