@@ -35,13 +35,30 @@ function AnimatedCounter({value}:{value:number}) {
 }
 
 export default function AnalyticsPage(){
-  // Mock stats + chart data
-  const [stats] = useState({
+  // 🔹 Dynamic mock stats
+  const [stats, setStats] = useState({
     revenue: 12500,
     users: 876,
     requests: 3200,
   });
 
+  // ⏱️ Last updated time
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+
+  // 🔁 Simulate live updates
+  useEffect(()=>{
+    const interval = setInterval(()=>{
+      setStats(prev=>({
+        revenue: prev.revenue + Math.floor(Math.random()*100 - 50),
+        users: prev.users + Math.floor(Math.random()*10 - 5),
+        requests: prev.requests + Math.floor(Math.random()*40 - 20),
+      }));
+      setLastUpdated(new Date());
+    },60000); // every 60 seconds
+    return ()=>clearInterval(interval);
+  },[]);
+
+  // 📊 Chart data (static for now)
   const revenueData = [
     {month: "Jan", revenue: 1200},
     {month: "Feb", revenue: 1800},
@@ -70,31 +87,44 @@ export default function AnalyticsPage(){
     {name: "Sun", requests: 3800},
   ];
 
+  // ⏳ Format last updated time
+  const formatTimeAgo = (time:Date)=>{
+    const diff = Math.floor((Date.now() - time.getTime()) / 60000);
+    if(diff < 1) return "Updated just now";
+    if(diff === 1) return "Updated 1 min ago";
+    return `Updated ${diff} mins ago`;
+  };
+
   return(
-    <div className="p-6 space-y-6 bg-transparent backdrop-blur-md rounded-2xl border border-white/10 shadow-lg">
-      <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
-        Analytics
-      </h1>
+    <div className="p-6 space-y-6 bg-transparent backdrop-blur-md rounded-2xl border border-neutral-300/30 dark:border-white/10 shadow-lg">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+          Analytics
+        </h1>
+        <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+          {formatTimeAgo(lastUpdated)}
+        </p>
+      </div>
 
       {/* 🔹 Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="p-4 bg-white/5 border border-white/10 rounded-xl shadow-md text-center hover:scale-[1.02] transition-transform duration-300">
-          <h2 className="text-sm text-gray-400 mb-1">💰 Total Revenue</h2>
-          <p className="text-2xl font-bold text-white">
+        <div className="p-4 bg-white/50 dark:bg-white/5 border border-neutral-300/50 dark:border-white/10 rounded-xl shadow-md text-center hover:scale-[1.02] transition-transform duration-300">
+          <h2 className="text-sm text-gray-600 dark:text-gray-400 mb-1">💰 Total Revenue</h2>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">
             $<AnimatedCounter value={stats.revenue}/>
           </p>
         </div>
 
-        <div className="p-4 bg-white/5 border border-white/10 rounded-xl shadow-md text-center hover:scale-[1.02] transition-transform duration-300">
-          <h2 className="text-sm text-gray-400 mb-1">👥 Active Users</h2>
-          <p className="text-2xl font-bold text-white">
+        <div className="p-4 bg-white/50 dark:bg-white/5 border border-neutral-300/50 dark:border-white/10 rounded-xl shadow-md text-center hover:scale-[1.02] transition-transform duration-300">
+          <h2 className="text-sm text-gray-600 dark:text-gray-400 mb-1">👥 Active Users</h2>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">
             <AnimatedCounter value={stats.users}/>
           </p>
         </div>
 
-        <div className="p-4 bg-white/5 border border-white/10 rounded-xl shadow-md text-center hover:scale-[1.02] transition-transform duration-300">
-          <h2 className="text-sm text-gray-400 mb-1">⚙️ API Requests Today</h2>
-          <p className="text-2xl font-bold text-white">
+        <div className="p-4 bg-white/50 dark:bg-white/5 border border-neutral-300/50 dark:border-white/10 rounded-xl shadow-md text-center hover:scale-[1.02] transition-transform duration-300">
+          <h2 className="text-sm text-gray-600 dark:text-gray-400 mb-1">⚙️ API Requests Today</h2>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">
             <AnimatedCounter value={stats.requests}/>
           </p>
         </div>
@@ -103,18 +133,19 @@ export default function AnalyticsPage(){
       {/* 🔹 Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         {/* Revenue Chart */}
-        <div className="p-4 bg-white/5 border border-white/10 rounded-xl shadow-lg">
-          <h2 className="text-lg font-medium text-gray-200 mb-3">
+        <div className="p-4 bg-white/50 dark:bg-white/5 border border-neutral-300/50 dark:border-white/10 rounded-xl shadow-lg">
+          <h2 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3">
             Monthly Revenue
           </h2>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={revenueData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-              <XAxis dataKey="month" stroke="#aaa" />
-              <YAxis stroke="#aaa" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
+              <XAxis dataKey="month" stroke="#666" />
+              <YAxis stroke="#666" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#111",
+                  backgroundColor: "rgba(255,255,255,0.9)",
+                  color: "#111",
                   border: "none",
                   borderRadius: "8px",
                 }}
@@ -131,18 +162,19 @@ export default function AnalyticsPage(){
         </div>
 
         {/* Users Chart */}
-        <div className="p-4 bg-white/5 border border-white/10 rounded-xl shadow-lg">
-          <h2 className="text-lg font-medium text-gray-200 mb-3">
+        <div className="p-4 bg-white/50 dark:bg-white/5 border border-neutral-300/50 dark:border-white/10 rounded-xl shadow-lg">
+          <h2 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3">
             Active Users
           </h2>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={usersData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-              <XAxis dataKey="month" stroke="#aaa" />
-              <YAxis stroke="#aaa" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
+              <XAxis dataKey="month" stroke="#666" />
+              <YAxis stroke="#666" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#111",
+                  backgroundColor: "rgba(255,255,255,0.9)",
+                  color: "#111",
                   border: "none",
                   borderRadius: "8px",
                 }}
@@ -160,18 +192,19 @@ export default function AnalyticsPage(){
       </div>
 
       {/* 🔹 API Requests Overview */}
-      <div className="p-4 bg-white/5 border border-white/10 rounded-xl shadow-lg">
-        <h2 className="text-lg font-medium text-gray-200 mb-3">
+      <div className="p-4 bg-white/50 dark:bg-white/5 border border-neutral-300/50 dark:border-white/10 rounded-xl shadow-lg">
+        <h2 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3">
           API Requests Overview
         </h2>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={apiRequestsData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-            <XAxis dataKey="name" stroke="#aaa" />
-            <YAxis stroke="#aaa" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#ccc" />
+            <XAxis dataKey="name" stroke="#666" />
+            <YAxis stroke="#666" />
             <Tooltip
               contentStyle={{
-                backgroundColor: "#111",
+                backgroundColor: "rgba(255,255,255,0.9)",
+                color: "#111",
                 border: "none",
                 borderRadius: "8px",
               }}
