@@ -1,5 +1,5 @@
 "use client";
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import {motion} from "framer-motion";
 
 export default function NotificationsForm(){
@@ -8,6 +8,23 @@ export default function NotificationsForm(){
     sms:false,
     push:true,
   });
+
+  // 🧠 Load saved notifications from localStorage
+  useEffect(()=>{
+    const saved = localStorage.getItem("notifications");
+    if(saved){
+      setNotifications(JSON.parse(saved));
+    }
+  },[]);
+
+  // 💾 Save to localStorage whenever toggled
+  useEffect(()=>{
+    localStorage.setItem("notifications", JSON.stringify(notifications));
+  },[notifications]);
+
+  const toggle=(key)=>{
+    setNotifications({...notifications,[key]:!notifications[key]});
+  };
 
   return(
     <motion.div
@@ -22,7 +39,7 @@ export default function NotificationsForm(){
           <input
             type="checkbox"
             checked={value}
-            onChange={()=>setNotifications({...notifications,[key]:!value})}
+            onChange={()=>toggle(key)}
             className="w-5 h-5 accent-indigo-500"
           />
         </div>

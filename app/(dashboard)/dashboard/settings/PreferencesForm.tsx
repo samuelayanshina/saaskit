@@ -1,8 +1,31 @@
 "use client";
-import React from "react";
+import React, {useState, useEffect} from "react";
 import {motion} from "framer-motion";
 
 export default function PreferencesForm(){
+  const [preferences, setPreferences] = useState({
+    theme:"system",
+    language:"English",
+    compact:false,
+  });
+
+  // 🧠 Load saved preferences from localStorage
+  useEffect(()=>{
+    const saved = localStorage.getItem("preferences");
+    if(saved){
+      setPreferences(JSON.parse(saved));
+    }
+  },[]);
+
+  // 💾 Save preferences to localStorage whenever they change
+  useEffect(()=>{
+    localStorage.setItem("preferences", JSON.stringify(preferences));
+  },[preferences]);
+
+  const handleChange = (key,value)=>{
+    setPreferences({...preferences,[key]:value});
+  };
+
   return(
     <motion.div
       initial={{opacity:0, y:15}}
@@ -13,7 +36,8 @@ export default function PreferencesForm(){
       <div className="flex items-center justify-between">
         <label className="text-sm text-gray-400">Theme</label>
         <select
-          defaultValue="system"
+          value={preferences.theme}
+          onChange={(e)=>handleChange("theme", e.target.value)}
           className="bg-white/5 border border-white/10 text-white text-sm rounded-md px-3 py-2"
         >
           <option value="system">System</option>
@@ -25,7 +49,8 @@ export default function PreferencesForm(){
       <div className="flex items-center justify-between">
         <label className="text-sm text-gray-400">Language</label>
         <select
-          defaultValue="English"
+          value={preferences.language}
+          onChange={(e)=>handleChange("language", e.target.value)}
           className="bg-white/5 border border-white/10 text-white text-sm rounded-md px-3 py-2"
         >
           <option>English</option>
@@ -38,7 +63,8 @@ export default function PreferencesForm(){
         <label className="text-sm text-gray-400">Compact Mode</label>
         <input
           type="checkbox"
-          defaultChecked={false}
+          checked={preferences.compact}
+          onChange={(e)=>handleChange("compact", e.target.checked)}
           className="w-5 h-5 accent-indigo-500"
         />
       </div>
