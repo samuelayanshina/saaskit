@@ -1,14 +1,19 @@
 "use client";
 import React from "react";
+import {motion} from "framer-motion";
 
-export default function PreferencesForm({preferences, setPreferences}:{preferences:any, setPreferences:any}){
+export default function PreferencesForm(){
   return(
-    <div className="space-y-6 mt-4">
+    <motion.div
+      initial={{opacity:0, y:15}}
+      animate={{opacity:1, y:0}}
+      transition={{duration:0.4, ease:"easeOut"}}
+      className="space-y-6 mt-4"
+    >
       <div className="flex items-center justify-between">
         <label className="text-sm text-gray-400">Theme</label>
         <select
-          value={preferences.theme}
-          onChange={(e)=>setPreferences({...preferences, theme:e.target.value})}
+          defaultValue="system"
           className="bg-white/5 border border-white/10 text-white text-sm rounded-md px-3 py-2"
         >
           <option value="system">System</option>
@@ -20,8 +25,7 @@ export default function PreferencesForm({preferences, setPreferences}:{preferenc
       <div className="flex items-center justify-between">
         <label className="text-sm text-gray-400">Language</label>
         <select
-          value={preferences.language}
-          onChange={(e)=>setPreferences({...preferences, language:e.target.value})}
+          defaultValue="English"
           className="bg-white/5 border border-white/10 text-white text-sm rounded-md px-3 py-2"
         >
           <option>English</option>
@@ -34,11 +38,10 @@ export default function PreferencesForm({preferences, setPreferences}:{preferenc
         <label className="text-sm text-gray-400">Compact Mode</label>
         <input
           type="checkbox"
-          checked={preferences.compactMode}
-          onChange={(e)=>setPreferences({...preferences, compactMode:e.target.checked})}
+          defaultChecked={false}
           className="w-5 h-5 accent-indigo-500"
         />
       </div>
-    </div>
+    </motion.div>
   );
 }
