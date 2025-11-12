@@ -2,6 +2,7 @@
 
 import React,{useEffect,useState} from "react";
 import {motion,AnimatePresence} from "framer-motion";
+import toast from "react-hot-toast";
 
 type Member = {
   id:string;
@@ -47,34 +48,47 @@ export default function TeamPage(){
   const [isLoading,setIsLoading] = useState(true);
   const [filter,setFilter] = useState("");
   const [lastUpdated,setLastUpdated] = useState<Date|null>(null);
+  const [showModal,setShowModal] = useState(false);
+  const [form,setForm] = useState({name:"",email:"",role:""});
 
   useEffect(()=>{
     setIsLoading(true);
     const t = setTimeout(()=>{
-      const mock = makeMockMembers(6);
-      setMembers(mock);
+      setMembers(makeMockMembers(6));
       setLastUpdated(new Date());
       setIsLoading(false);
     }, 800 + Math.random()*700);
     return ()=>clearTimeout(t);
   },[]);
 
-  const handleInvite = ()=>{
-    const id = `m_${Date.now()}`;
-    const newMember:Member = {
-      id,
-      name:"New Invitee",
-      role:"Invited",
-      email:`invite_${Date.now()}@example.com`,
-      avatarColor:"#06B6D4"
-    };
-    setMembers(prev=>prev? [newMember,...prev] : [newMember]);
-    setLastUpdated(new Date());
-  };
-
   const handleRemove = (id:string)=>{
     setMembers(prev=>prev? prev.filter(m=>m.id!==id) : prev);
     setLastUpdated(new Date());
+    toast("Member removed", {icon:"🗑️"});
+  };
+
+  const handleSubmit = (e:React.FormEvent)=>{
+    e.preventDefault();
+    if(!form.name || !form.email || !form.role){
+      toast.error("All fields required");
+      return;
+    }
+
+    const id = `m_${Date.now()}`;
+    const colors = ["#6366F1","#10B981","#F59E0B","#EF4444","#8B5CF6","#06B6D4"];
+    const newMember:Member = {
+      id,
+      name:form.name,
+      email:form.email,
+      role:form.role,
+      avatarColor:colors[Math.floor(Math.random()*colors.length)]
+    };
+
+    setMembers(prev=>prev? [newMember,...prev] : [newMember]);
+    setForm({name:"",email:"",role:""});
+    setShowModal(false);
+    setLastUpdated(new Date());
+    toast.success("Member invited successfully 🎉");
   };
 
   const filtered = members?.filter(m=>
@@ -99,7 +113,7 @@ export default function TeamPage(){
             className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm focus:outline-none"
           />
           <button
-            onClick={handleInvite}
+            onClick={()=>setShowModal(true)}
             className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm hover:bg-indigo-500 transition"
           >
             Invite
@@ -160,6 +174,71 @@ export default function TeamPage(){
           )}
         </div>
       </div>
+
+      {/* Modal */}
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            initial={{opacity:0}}
+            animate={{opacity:1}}
+            exit={{opacity:0}}
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center"
+          >
+            <motion.div
+              initial={{scale:0.95,opacity:0}}
+              animate={{scale:1,opacity:1}}
+              exit={{scale:0.95,opacity:0}}
+              transition={{duration:0.25}}
+              className="bg-gray-900/90 border border-white/10 text-white p-6 rounded-2xl w-full max-w-md shadow-xl"
+            >
+              <h2 className="text-lg font-semibold mb-4">Invite New Member</h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Full name"
+                  value={form.name}
+                  onChange={(e)=>setForm({...form,name:e.target.value})}
+                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none"
+                />
+                <input
+                  type="email"
+                  placeholder="Email address"
+                  value={form.email}
+                  onChange={(e)=>setForm({...form,email:e.target.value})}
+                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none"
+                />
+                <select
+                  value={form.role}
+                  onChange={(e)=>setForm({...form,role:e.target.value})}
+                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none"
+                >
+                  <option value="">Select role</option>
+                  <option value="Owner">Owner</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Developer">Developer</option>
+                  <option value="Designer">Designer</option>
+                  <option value="Support">Support</option>
+                </select>
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={()=>setShowModal(false)}
+                    className="px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-sm hover:bg-white/10"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 rounded-lg bg-indigo-600 text-sm hover:bg-indigo-500"
+                  >
+                    Invite
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
