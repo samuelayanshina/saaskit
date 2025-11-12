@@ -1,8 +1,7 @@
 "use client";
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {motion} from "framer-motion";
 import toast from "react-hot-toast";
-
 
 export default function NotificationsForm(){
   const defaultNotifications = {
@@ -13,32 +12,42 @@ export default function NotificationsForm(){
 
   const [notifications, setNotifications] = useState(defaultNotifications);
   const [resetting, setResetting] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const saveTimeout = useRef<NodeJS.Timeout|null>(null);
 
-  // 🧠 Load saved notifications
+  // 🧠 Load saved notifications on mount
   useEffect(()=>{
     const saved = localStorage.getItem("notifications");
-    if(saved) setNotifications(JSON.parse(saved));
+    if(saved){
+      setNotifications(JSON.parse(saved));
+    }
+    setHasLoaded(true);
   },[]);
 
-  // 💾 Save to localStorage
+  // 💾 Debounced save after user changes
   useEffect(()=>{
-  localStorage.setItem("notifications", JSON.stringify(notifications));
-  toast.success("Notification settings saved");
-},[notifications]);
+    if(!hasLoaded) return;
+
+    if(saveTimeout.current) clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(()=>{
+      localStorage.setItem("notifications", JSON.stringify(notifications));
+      toast.success("Notification settings saved");
+    }, 800);
+  }, [notifications, hasLoaded]);
 
   const toggle=(key)=>{
-    setNotifications({...notifications,[key]:!notifications[key]});
+    setNotifications(prev=>({...prev,[key]:!prev[key]}));
   };
 
   const handleReset=()=>{
-  setResetting(true);
-  setTimeout(()=>{
-    setNotifications(defaultNotifications);
-    localStorage.removeItem("notifications");
-    setResetting(false);
-    toast("Notifications reset", {icon:"🔄"});
-  },1000);
-};
+    setResetting(true);
+    setTimeout(()=>{
+      setNotifications(defaultNotifications);
+      localStorage.removeItem("notifications");
+      setResetting(false);
+      toast("Notifications reset", {icon:"🔄"});
+    },1000);
+  };
 
   return(
     <motion.div

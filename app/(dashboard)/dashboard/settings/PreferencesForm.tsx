@@ -1,8 +1,7 @@
 "use client";
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {motion} from "framer-motion";
 import toast from "react-hot-toast";
-
 
 export default function PreferencesForm(){
   const defaultPreferences = {
@@ -13,32 +12,42 @@ export default function PreferencesForm(){
 
   const [preferences, setPreferences] = useState(defaultPreferences);
   const [resetting, setResetting] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const saveTimeout = useRef<NodeJS.Timeout|null>(null);
 
-  // 🧠 Load saved preferences
+  // 🧠 Load saved preferences on mount
   useEffect(()=>{
     const saved = localStorage.getItem("preferences");
-    if(saved) setPreferences(JSON.parse(saved));
+    if(saved){
+      setPreferences(JSON.parse(saved));
+    }
+    setHasLoaded(true);
   },[]);
 
-  // 💾 Save to localStorage
+  // 💾 Debounced save after user changes
   useEffect(()=>{
-  localStorage.setItem("preferences", JSON.stringify(preferences));
-  toast.success("Preferences saved");
-},[preferences]);
+    if(!hasLoaded) return;
+
+    if(saveTimeout.current) clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(()=>{
+      localStorage.setItem("preferences", JSON.stringify(preferences));
+      toast.success("Preferences saved ✨");
+    }, 800); // Debounce 800ms
+  }, [preferences, hasLoaded]);
 
   const handleChange=(key,value)=>{
-    setPreferences({...preferences,[key]:value});
+    setPreferences(prev=>({...prev,[key]:value}));
   };
 
   const handleReset=()=>{
-  setResetting(true);
-  setTimeout(()=>{
-    setPreferences(defaultPreferences);
-    localStorage.removeItem("preferences");
-    setResetting(false);
-    toast("Reset to defaults", {icon:"♻️"});
-  },1000);
-};
+    setResetting(true);
+    setTimeout(()=>{
+      setPreferences(defaultPreferences);
+      localStorage.removeItem("preferences");
+      setResetting(false);
+      toast.success("Notifications reset 🔄");
+    },1000);
+  };
 
   return(
     <motion.div
