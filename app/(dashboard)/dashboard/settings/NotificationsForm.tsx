@@ -1,6 +1,8 @@
 "use client";
 import React, {useState, useEffect} from "react";
 import {motion} from "framer-motion";
+import toast from "react-hot-toast";
+
 
 export default function NotificationsForm(){
   const defaultNotifications = {
@@ -20,21 +22,23 @@ export default function NotificationsForm(){
 
   // 💾 Save to localStorage
   useEffect(()=>{
-    localStorage.setItem("notifications", JSON.stringify(notifications));
-  },[notifications]);
+  localStorage.setItem("notifications", JSON.stringify(notifications));
+  toast.success("Notification settings saved");
+},[notifications]);
 
   const toggle=(key)=>{
     setNotifications({...notifications,[key]:!notifications[key]});
   };
 
   const handleReset=()=>{
-    setResetting(true);
-    setTimeout(()=>{
-      setNotifications(defaultNotifications);
-      localStorage.removeItem("notifications");
-      setResetting(false);
-    },1000);
-  };
+  setResetting(true);
+  setTimeout(()=>{
+    setNotifications(defaultNotifications);
+    localStorage.removeItem("notifications");
+    setResetting(false);
+    toast("Notifications reset", {icon:"🔄"});
+  },1000);
+};
 
   return(
     <motion.div

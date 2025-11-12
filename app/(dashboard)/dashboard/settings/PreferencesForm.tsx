@@ -1,6 +1,8 @@
 "use client";
 import React, {useState, useEffect} from "react";
 import {motion} from "framer-motion";
+import toast from "react-hot-toast";
+
 
 export default function PreferencesForm(){
   const defaultPreferences = {
@@ -20,21 +22,23 @@ export default function PreferencesForm(){
 
   // 💾 Save to localStorage
   useEffect(()=>{
-    localStorage.setItem("preferences", JSON.stringify(preferences));
-  },[preferences]);
+  localStorage.setItem("preferences", JSON.stringify(preferences));
+  toast.success("Preferences saved");
+},[preferences]);
 
   const handleChange=(key,value)=>{
     setPreferences({...preferences,[key]:value});
   };
 
   const handleReset=()=>{
-    setResetting(true);
-    setTimeout(()=>{
-      setPreferences(defaultPreferences);
-      localStorage.removeItem("preferences");
-      setResetting(false);
-    },1000);
-  };
+  setResetting(true);
+  setTimeout(()=>{
+    setPreferences(defaultPreferences);
+    localStorage.removeItem("preferences");
+    setResetting(false);
+    toast("Reset to defaults", {icon:"♻️"});
+  },1000);
+};
 
   return(
     <motion.div
