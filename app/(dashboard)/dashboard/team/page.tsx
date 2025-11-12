@@ -63,6 +63,22 @@ export default function TeamPage(){
     return ()=>clearTimeout(t);
   },[]);
 
+    // Prevent background scroll + layout shift when modal opens
+  useEffect(()=>{
+    if(showModal){
+      document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = "0px"; // Prevent horizontal jump
+    }else{
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    }
+    return ()=>{
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    };
+  },[showModal]);
+
+
   const handleRemove = (id:string)=>{
     setMembers(prev=>prev? prev.filter(m=>m.id!==id) : prev);
     setLastUpdated(new Date());
