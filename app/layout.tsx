@@ -1,33 +1,36 @@
-import type {Metadata} from 'next';
-import {Geist, Geist_Mono} from 'next/font/google';
-import './globals.css';
-import ClientLayout from './ClientLayout';
+import type {Metadata} from "next";
+import {Inter, Roboto_Mono} from "next/font/google";
+import "./globals.css";
+import ClientLayout from "./ClientLayout";
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+const robotoMono = Roboto_Mono({
+  variable: "--font-roboto-mono",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: 'SaaSKit Dashboard',
-  description: 'A sleek glassmorphic admin dashboard',
+  title: "Cjet Dispatch Dashboard",
+  description: "A sleek glassmorphic admin dashboard for Cjet Dispatch",
 };
 
-export default function RootLayout({children}:{children:React.ReactNode}){
+export default function RootLayout({children}:{children:React.ReactNode}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`
-          ${geistSans.variable} 
-          ${geistMono.variable} 
+          ${inter.variable}
+          ${robotoMono.variable}
           min-h-screen antialiased
-          bg-gray-50 text-gray-900 
+          bg-gray-50 text-gray-900
           dark:bg-[#0E0E10] dark:text-gray-100
+          overflow-x-hidden
         `}
       >
         <ClientLayout>{children}</ClientLayout>

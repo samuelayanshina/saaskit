@@ -34,3 +34,32 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+## 📊 Analytics Module
+
+The **Analytics Dashboard** provides startup founders and developers with a quick visual overview of platform usage and key metrics.
+
+### 🚀 Features
+- **Live Stat Cards:** Displays total revenue, active users, and daily API requests — with smooth animated counters.  
+- **Real-Time Updates:** Stats refresh automatically every 60 seconds to simulate live backend data.  
+- **Charts Visualization:**  
+  - Monthly revenue and user growth line charts.  
+  - API requests bar chart for weekly traffic overview.  
+- **Dark/Light Mode Optimized:** All text and charts adjust automatically for visibility.  
+- **Last Updated Timestamp:** Shows when the analytics data was last refreshed.
+
+### 🧩 Tech Stack
+- **Next.js 14+ (App Router)**  
+- **React Hooks** (`useState`, `useEffect`)  
+- **Recharts** for data visualization  
+- **Tailwind CSS** for glassmorphic styling  
+
+### 🧠 Future Integration
+When connecting to your backend or Firebase:
+1. Replace the mock `stats` object and chart arrays with live API data.
+2. Adjust update intervals or use WebSocket subscriptions for real-time analytics.
+3. Extend charts to include metrics like MRR, churn rate, or API latency.
+
+### 🗂️ File Path
+
