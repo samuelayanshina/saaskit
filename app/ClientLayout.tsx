@@ -19,6 +19,14 @@ export default function ClientLayout({children}:{children:React.ReactNode}){
         className="min-h-screen transition-colors duration-700 bg-[var(--background)] text-[var(--foreground)]"
       >
         {children}
+
+        {/* Global modal style fix */}
+        <style jsx global>{`
+          body.modal-open {
+            overflow: hidden;
+            padding-right: var(--scrollbar-width, 0px);
+          }
+        `}</style>
       </motion.div>
     </ThemeProvider>
   );

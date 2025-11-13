@@ -22,7 +22,7 @@ const Sidebar = ()=>{
   return(
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 p-4 flex-col h-screen border-r border-black/10 bg-white/70 dark:bg-black/30 backdrop-blur-xl transition-colors duration-300">
+      <aside className="hidden md:flex flex-shrink-0 w-64 p-4 flex-col h-screen border-r border-black/10 bg-white/70 dark:bg-black/30 backdrop-blur-xl transition-colors duration-300 overflow-y-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-gray-900 dark:text-white text-xl font-semibold">SaaSKit</h1>
         </div>

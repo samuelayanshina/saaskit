@@ -12,7 +12,7 @@ export default function Topbar() {
   if(!mounted) return null;
 
   return (
-    <header className="sticky top-0 z-[50] h-16 border-b border-gray-200 dark:border-white/10 bg-white/70 dark:bg-black/30 backdrop-blur-lg flex items-center justify-between px-6 transition-colors duration-300">
+    <header className="sticky top-0 z-[50] h-16 border-b border-gray-200 dark:border-white/10 bg-white/70 dark:bg-black/30 backdrop-blur-lg flex items-center justify-between px-6 transition-colors duration-300 w-full min-w-0 overflow-hidden">
       <div className="flex-1 flex items-center justify-center md:justify-start">
         <h1 className="text-gray-900 dark:text-white text-lg font-semibold translate-x-2 md:translate-x-0">
           SaaSKit Dashboard
