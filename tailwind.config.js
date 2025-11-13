@@ -13,6 +13,10 @@ module.exports = {
         foreground: "var(--foreground)",
         accent: "#6366F1",
       },
+      fontFamily: {
+      sans: ['var(--font-inter)', 'sans-serif'],
+      mono: ['var(--font-mono)', 'monospace'],
+    },
       backgroundImage: {
         "glass-gradient": "linear-gradient(145deg, rgba(30,30,32,0.9), rgba(18,18,19,0.9))",
       },
