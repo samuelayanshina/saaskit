@@ -1,5 +1,6 @@
 "use client";
 import {useEffect, useState} from "react";
+import Link from 'next/link';
 
 export default function BillingPage(){
   const [billing, setBilling] = useState([]);
@@ -25,6 +26,15 @@ export default function BillingPage(){
       <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
         Billing
       </h1>
+
+      {/* ➕ Add New Billing Button */}
+<div className="flex justify-end mb-4">
+  <Link href="/dashboard/billing/create">
+    <button className="bg-blue-600 text-white px-4 py-2 rounded">
+      + New Billing
+    </button>
+  </Link>
+</div>
 
       {loading ? (
         <p className="text-gray-400">Loading billing data...</p>
