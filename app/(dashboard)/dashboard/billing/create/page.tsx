@@ -1,6 +1,6 @@
 "use client";
 
-import BillingForm from "./BillingForm";
+import BillingForm from "../BillingForm";
 
 export default function BillingCreatePage(){
   return (
