@@ -8,68 +8,71 @@ datasource db {
 }
 
 model User {
-  id              String       @id @default(cuid())
-  email           String       @unique
-  name            String?
-  slug            String
-  members         TeamMember[] @relation("UserAsMember")
-  teamMemberships TeamMember[] @relation("UserAsTeamMember")
-  billing         Billing?     @relation("UserBilling")
-  documents       Document[]
-  teams           Team[]       @relation("UserTeams")
+  id        String       @id @default(cuid())
+  email     String       @unique
+  name      String?
+  slug      String
 
-  // 👇 FIXED relation: explicitly declares opposite side name
-  sentLetters Letter[] @relation("UserSentLetters")
+  // Team Memberships
+  teamMemberships TeamMember[]
+
+  billing   Billing?     @relation("UserBilling")
+  documents Document[]
+  sentLetters Letter[]   @relation("UserSentLetters")
+
+  teams Team[] @relation("UserTeams")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Team {
-  id        String       @id @default(cuid())
-  name      String
-  slug      String       @unique
-  userId    String?
-  user      User?        @relation("UserTeams", fields: [userId], references: [id]) // ✅ matches User.teams
-  billing   Billing?     @relation("TeamBilling")
-  members   TeamMember[] @relation("TeamHasMembers")
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  id      String       @id @default(cuid())
+  name    String
+  slug    String       @unique
+
+  userId  String?
+  user    User?        @relation("UserTeams", fields:[userId], references:[id])
+
+  billing Billing?     @relation("TeamBilling")
+  members TeamMember[] @relation("TeamHasMembers")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model TeamMember {
   id        String   @id @default(cuid())
-  role      String
+
+  // Relations
   teamId    String
-  memberId  String?
-  userId    String?
+  userId    String
+  roleId    String?
+
+  team Team @relation("TeamHasMembers", fields:[teamId], references:[id])
+  user User @relation(fields:[userId], references:[id])
+  role Role? @relation("RoleAssignments", fields:[roleId], references:[id])
+
   createdAt DateTime @default(now())
 
-  // 👇 Relation to Team (matches "TeamHasMembers")
-  team Team @relation("TeamHasMembers", fields: [teamId], references: [id])
-
-  // 👇 Relation to User as a member
-  userAsMember User? @relation("UserAsMember", fields: [memberId], references: [id], map: "TeamMember_memberId_fkey")
-
-  // 👇 Relation to User as a team member (different key)
-  userAsTeamMember User? @relation("UserAsTeamMember", fields: [userId], references: [id], map: "TeamMember_userId_fkey")
+  @@unique([teamId, userId]) // A user cannot join the same team twice
 }
 
 model Billing {
   id               String    @id @default(cuid())
   teamId           String?   @unique
   userId           String?   @unique
-  plan             String    @default("free") // free | pro | enterprise
-  status           String    @default("active") // active | trialing | cancelled
+  plan             String    @default("free")
+  status           String    @default("active")
   currentPeriodEnd DateTime?
   customerId       String?
   subscriptionId   String?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
 
-  // 👇 Both opposite sides for one-to-one
-  team Team? @relation("TeamBilling", fields: [teamId], references: [id])
-  user User? @relation("UserBilling", fields: [userId], references: [id])
+  team Team? @relation("TeamBilling", fields:[teamId], references:[id])
+  user User? @relation("UserBilling", fields:[userId], references:[id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Document {
@@ -77,9 +80,11 @@ model Document {
   title       String
   content     String?
   categoryId  String?
-  category    Category? @relation(fields: [categoryId], references: [id])
+  category    Category? @relation(fields:[categoryId], references:[id])
+
   createdById String
-  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdBy   User      @relation(fields:[createdById], references:[id])
+
   status      String    @default("pending")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -90,9 +95,8 @@ model Letter {
   title String
   body  String
 
-  // 👇 FIXED relation to match User.sentLetters
   senderId String
-  sender   User   @relation("UserSentLetters", fields: [senderId], references: [id])
+  sender   User @relation("UserSentLetters", fields:[senderId], references:[id])
 
   status    String   @default("draft")
   createdAt DateTime @default(now())
@@ -103,4 +107,44 @@ model Category {
   name      String     @unique
   icon      String?
   documents Document[]
+}
+
+/* ----------------------------------
+   GLOBAL PERMISSION CATALOG (RBAC)
+-----------------------------------*/
+
+model Permission {
+  id          String           @id @default(cuid())
+  code        String           @unique
+  description String?
+  roleLinks   RolePermission[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Role {
+  id              String           @id @default(cuid())
+  name            String           @unique
+  description     String?
+  isDefault       Boolean          @default(false)
+
+  memberLinks     TeamMember[]     @relation("RoleAssignments")
+  permissionLinks RolePermission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields:[roleId], references:[id])
+  permission Permission @relation(fields:[permissionId], references:[id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([roleId, permissionId])
 }

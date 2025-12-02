@@ -64,19 +64,37 @@ export default function TeamPage(){
   },[]);
 
     // Prevent background scroll + layout shift when modal opens
-  useEffect(()=>{
-    if(showModal){
-      document.body.style.overflow = "hidden";
-      document.body.style.paddingRight = "0px"; // Prevent horizontal jump
-    }else{
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
+  // --- replace existing showModal useEffect with this ---
+useEffect(()=>{
+  if(typeof window === "undefined") return;
+  const html = document.documentElement;
+  const body = document.body;
+
+  if(showModal){
+    const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth || 0;
+    // hide scroll but preserve layout by applying padding to both html+body
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    if(scrollBarWidth>0){
+      const pad = `${scrollBarWidth}px`;
+      html.style.paddingRight = pad;
+      body.style.paddingRight = pad;
     }
-    return ()=>{
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
-    };
-  },[showModal]);
+  }else{
+    html.style.overflow = "";
+    body.style.overflow = "";
+    html.style.paddingRight = "";
+    body.style.paddingRight = "";
+  }
+
+  return ()=>{
+    // cleanup
+    html.style.overflow = "";
+    body.style.overflow = "";
+    html.style.paddingRight = "";
+    body.style.paddingRight = "";
+  };
+},[showModal]);
 
 
   const handleRemove = (id:string)=>{
@@ -117,7 +135,7 @@ setTimeout(()=>setHighlightedId(null), 1200);
   );
 
   return (
-    <div className="space-y-6 overflow-x-hidden w-full max-w-full">
+    <div className="space-y-6 w-full max-w-full overflow-x-hidden min-w-0">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 overflow-x-hidden">
         <div>
@@ -130,7 +148,8 @@ setTimeout(()=>setHighlightedId(null), 1200);
             placeholder="Search members or email..."
             value={filter}
             onChange={(e)=>setFilter(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm focus:outline-none w-full sm:w-auto"
+            // input element
+className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm focus:outline-none w-full sm:w-auto min-w-0"
           />
           <button
             onClick={()=>setShowModal(true)}
@@ -156,12 +175,12 @@ setTimeout(()=>setHighlightedId(null), 1200);
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 overflow-hidden">
           <AnimatePresence>
             {!isLoading && filtered && filtered.length>0 ? filtered.map((m)=>(
-              <motion.div
+              <motion.div 
   key={m.id}
   {...cardMotion}
-  className={`bg-transparent backdrop-blur-md rounded-2xl border border-white/10 p-4 flex items-center gap-4 shadow overflow-hidden transition-all duration-500 ${
-    highlightedId===m.id ? "ring-2 ring-indigo-500/60 scale-[1.02]" : ""
-  }`}
+  className={`relative bg-transparent backdrop-blur-md rounded-2xl border border-white/10 p-4 flex items-center gap-4 shadow overflow-hidden transition-all duration-500 ${
+  highlightedId===m.id ? "before:content-[''] before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-r before:from-indigo-500/20 before:via-sky-500/20 before:to-purple-500/20 before:animate-pulse ring-2 ring-indigo-500/40 scale-[1.02]" : ""
+}`}
 >
                 <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold shrink-0" style={{backgroundColor:m.avatarColor}}>
                   {m.name.split(" ").map(x=>x[0]).slice(0,2).join("")}

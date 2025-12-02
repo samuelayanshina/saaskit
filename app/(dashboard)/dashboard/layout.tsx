@@ -7,7 +7,8 @@ import {Toaster} from "react-hot-toast";
 
 export default function DashboardLayout({children}:{children:React.ReactNode}){
   return(
-    <div className="relative flex min-h-screen overflow-hidden bg-gray-50 dark:bg-black transition-colors duration-700">
+    <div className="relative flex min-h-screen bg-gray-50 dark:bg-black transition-colors duration-700 overflow-x-hidden min-w-0">
+
 
       {/* ✨ Animated Background Glow */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
