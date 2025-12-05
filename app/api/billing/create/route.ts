@@ -10,12 +10,12 @@ const payloadSchema = z.object({
   plan: z.enum(["free","pro","enterprise"]).optional().default("free"),
   customerId: z.string().optional().nullable(),
   subscriptionId: z.string().optional().nullable(),
-  currentPeriodEnd: z.string().optional().nullable(), // ISO date string optional
+  nextBillingDate: z.string().optional().nullable(),   // <- Updated
   status: z.enum(["active","trialing","cancelled"]).optional().default("active"),
 });
 
-// Utility to parse date string or fallback
-const parseOrDefaultPeriod = (plan, providedIso)=> {
+// Compute next billing date
+const computeNextBillingDate = (plan, providedIso)=> {
   if (providedIso) return new Date(providedIso);
   if (plan === "free") return null;
   return addDays(new Date(), 30);
@@ -26,32 +26,40 @@ export async function POST(request: Request) {
     const body = await request.json();
     const parsed = payloadSchema.parse(body);
 
-    const {userId, teamId, plan, customerId, subscriptionId, currentPeriodEnd, status} = parsed;
+    const {
+      userId,
+      teamId,
+      plan,
+      customerId,
+      subscriptionId,
+      nextBillingDate,
+      status
+    } = parsed;
 
-    // Validation rules from your spec
     if ((userId && teamId) || (!userId && !teamId)) {
-      return NextResponse.json({error: "Provide exactly one of userId or teamId"}, {status:400});
+      return NextResponse.json(
+        {error: "Provide exactly one of userId or teamId"},
+        {status: 400}
+      );
     }
 
     const prisma = getPrisma;
 
-    // compute period
-    const periodDate = parseOrDefaultPeriod(plan, currentPeriodEnd);
+    const billingDate = computeNextBillingDate(plan, nextBillingDate);
 
-    // Shared data
     const dataToWrite = {
       plan,
       status,
       customerId,
       subscriptionId,
-      currentPeriodEnd: periodDate,
+      nextBillingDate: billingDate,      // <- Updated field
     };
 
+    // TEAM BILLING
     if (teamId) {
-      // Check existing billing for team
       const existing = await prisma.billing.findUnique({where:{teamId}});
+
       if (existing) {
-        // Update existing
         const updated = await prisma.billing.update({
           where:{teamId},
           data: {...dataToWrite, updatedAt: new Date()},
@@ -59,20 +67,17 @@ export async function POST(request: Request) {
         return NextResponse.json({billing: updated});
       }
 
-      // create new team billing
       const created = await prisma.billing.create({
         data: {
           ...dataToWrite,
-          team: {connect: {id: teamId}},
+          team: {connect:{id: teamId}},
         },
         include: {team: true},
       });
 
-      // Auto-assign Owner role if this team has no members:
+      // Auto-create owner membership if needed
       const memberCount = await prisma.teamMember.count({where:{teamId}});
       if (memberCount === 0 && userId) {
-        // Create a TeamMember as Owner for the invoking user if userId present
-        // For safety: only create if user exists
         const user = await prisma.user.findUnique({where:{id: userId}});
         if (user) {
           await prisma.teamMember.create({
@@ -86,31 +91,32 @@ export async function POST(request: Request) {
       }
 
       return NextResponse.json({billing: created});
-    } else {
-      // userId path
-      const existing = await prisma.billing.findUnique({where:{userId}});
-      if (existing) {
-        const updated = await prisma.billing.update({
-          where:{userId},
-          data: {...dataToWrite, updatedAt: new Date()},
-        });
-        return NextResponse.json({billing: updated});
-      }
-      const created = await prisma.billing.create({
-        data: {
-          ...dataToWrite,
-          user: {connect: {id: userId}},
-        },
-        include: {user: true},
-      });
-      return NextResponse.json({billing: created});
     }
+
+    // USER BILLING
+    const existing = await prisma.billing.findUnique({where:{userId}});
+    if (existing) {
+      const updated = await prisma.billing.update({
+        where:{userId},
+        data: {...dataToWrite, updatedAt: new Date()},
+      });
+      return NextResponse.json({billing: updated});
+    }
+
+    const created = await prisma.billing.create({
+      data: {
+        ...dataToWrite,
+        user: {connect:{id: userId}},
+      },
+      include: {user: true},
+    });
+
+    return NextResponse.json({billing: created});
   }catch(err:any){
-    // zod error handling
     if (err?.name === "ZodError") {
-      return NextResponse.json({error: err.errors}, {status:400});
+      return NextResponse.json({error: err.errors}, {status: 400});
     }
     console.error("Billing create error:", err);
-    return NextResponse.json({error: err?.message ?? "Unknown error"}, {status:500});
+    return NextResponse.json({error: err?.message ?? "Unknown error"}, {status: 500});
   }
 }
