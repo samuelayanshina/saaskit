@@ -1,6 +1,8 @@
 "use client";
+
 import {useEffect, useState} from "react";
-import Link from 'next/link';
+import Link from "next/link";
+import BillingList from "./components/BillingList";   // ✅ Added import
 
 export default function BillingPage(){
   const [billing, setBilling] = useState([]);
@@ -28,13 +30,13 @@ export default function BillingPage(){
       </h1>
 
       {/* ➕ Add New Billing Button */}
-<div className="flex justify-end mb-4">
-  <Link href="/dashboard/billing/create">
-    <button className="bg-blue-600 text-white px-4 py-2 rounded">
-      + New Billing
-    </button>
-  </Link>
-</div>
+      <div className="flex justify-end mb-4">
+        <Link href="/dashboard/billing/create">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded">
+            + New Billing
+          </button>
+        </Link>
+      </div>
 
       {loading ? (
         <p className="text-gray-400">Loading billing data...</p>
@@ -76,38 +78,7 @@ export default function BillingPage(){
           {/* 🔹 Invoices */}
           <div className="space-y-2">
             <h2 className="text-lg font-medium text-white">Invoices</h2>
-            <div className="overflow-hidden rounded-lg border border-white/10">
-              <table className="min-w-full text-sm">
-                <thead className="bg-white/5 text-gray-400 uppercase text-xs">
-                  <tr>
-                    <th className="text-left px-4 py-3">Date</th>
-                    <th className="text-left px-4 py-3">Amount</th>
-                    <th className="text-left px-4 py-3">Status</th>
-                    <th className="text-left px-4 py-3">Download</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {billing.length > 0 ? (
-                    billing.map((item:any)=>(
-                      <tr key={item.id} className="border-t border-white/10 text-gray-300">
-                        <td className="px-4 py-3">{item.date || "—"}</td>
-                        <td className="px-4 py-3">${item.amount || "0.00"}</td>
-                        <td className="px-4 py-3">{item.status || "Paid"}</td>
-                        <td className="px-4 py-3">
-                          <a href={item.invoiceUrl || "#"} className="text-blue-400 hover:underline">Download</a>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={4} className="text-center text-gray-500 py-4">
-                        No invoices found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+            <BillingList/>  {/* ✅ Clean + Correct */}
           </div>
         </>
       )}
