@@ -63,3 +63,17 @@ When connecting to your backend or Firebase:
 
 ### 🗂️ File Path
 
+
+## 🔧 Stripe Setup (Required for Billing)
+Your SaaS Kit uses Stripe for subscriptions.
+
+1. Go to Stripe → Products
+2. Create 3 plans: Starter, Pro, Enterprise
+3. Copy each Price ID
+4. Paste them into your `.env` file:
+
+STRIPE_STARTER_PRICE_ID=price_xxx
+STRIPE_PRO_PRICE_ID=price_xxx
+STRIPE_ENTERPRISE_PRICE_ID=price_xxx
+
+
