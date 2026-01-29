@@ -25,27 +25,54 @@ export default function BillingPlanModal({userId, open, onClose}:{userId:string,
   const [plan, setPlan] = useState("pro");
   const [loading, setLoading] = useState(false);
 
-  const handleGoToCheckout = async ()=> {
-    try {
-      setLoading(true);
-      const res = await fetch("/api/stripe/create-checkout-session", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({userId, plan}),
-      });
-      const json = await res.json();
-      if (json?.url) {
-        window.location.href = json.url;
-      } else {
-        alert(json?.error || "Failed to create checkout session");
-      }
-    } catch (err:any) {
-      console.error(err);
-      alert(err?.message || "Network error");
-    } finally {
-      setLoading(false);
-    }
-  };
+//   const handleGoToCheckout = async ()=> {
+//     try {
+//       setLoading(true);
+//       const res = await fetch("/api/stripe/create-checkout-session", {
+//         method: "POST",
+//         headers: {"Content-Type":"application/json"},
+//         body: JSON.stringify({userId, plan}),
+//       });
+//       const json = await res.json();
+//       if (json?.url) {
+//         window.location.href = json.url;
+//       } else {
+//         alert(json?.error || "Failed to create checkout session");
+//       }
+//     } catch (err:any) {
+//       console.error(err);
+//       alert(err?.message || "Network error");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+const handleGoToCheckout = async ()=> {
+  const selectedPriceId = PLANS.find((p)=> p.id === plan)?.priceId;
+
+  try {
+    setLoading(true);
+    const res = await fetch("/api/stripe/create-checkout-session", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        userId,
+        priceId: selectedPriceId, // ✅ Correct Stripe price
+      }),
+    });
+
+    const json = await res.json();
+    if (json?.url) window.location.href = json.url;
+    else alert(json?.error || "Failed to create checkout session");
+  } catch (err:any) {
+    alert(err?.message || "Network error");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
 
   if (!open) return null;
 
