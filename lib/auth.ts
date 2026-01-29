@@ -1,7 +1,8 @@
-// lib/auth.tsx
+// lib/auth.ts
 "use client";
+
 import React, {createContext, useContext, useEffect, useState} from "react";
-import { auth } from "@/lib/firebaseClient";
+import {auth} from "@/lib/firebaseClient";
 import {
   GoogleAuthProvider,
   signInWithPopup,
@@ -35,32 +36,62 @@ export const AuthProvider = ({children}:{children:React.ReactNode})=>{
     return ()=>unsub();
   },[]);
 
-  const signInWithGoogle = async ()=> {
+  /**
+   * 🔐 Sync authenticated user with backend
+   * Creates Firestore user record if it doesn't exist
+   */
+  const syncUser = async ()=>{
+    const token = await auth.currentUser?.getIdToken();
+    if (!token) return;
+
+    await fetch("/api/auth/sync-user", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+
+  const signInWithGoogle = async ()=>{
     const provider = new GoogleAuthProvider();
     await signInWithPopup(auth, provider);
+    await syncUser();
   };
 
   const signUpWithEmail = async (email:string,password:string)=>{
     await createUserWithEmailAndPassword(auth,email,password);
+    await syncUser();
   };
 
   const signInWithEmail = async (email:string,password:string)=>{
     await signInWithEmailAndPassword(auth,email,password);
+    await syncUser();
   };
 
-  const signOutUser = async ()=> {
+  const signOutUser = async ()=>{
     await signOut(auth);
   };
 
   return (
-    <AuthContext.Provider value={{user,loading,signInWithGoogle,signUpWithEmail,signInWithEmail,signOutUser}}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        signInWithGoogle,
+        signUpWithEmail,
+        signInWithEmail,
+        signOutUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = ()=> {
+export const useAuth = ()=>{
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  if (!ctx) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
   return ctx;
 };
