@@ -4,9 +4,35 @@ import React from "react";
 import Sidebar from "@/components/shared/Sidebar";
 import Topbar from "@/components/shared/Topbar";
 import {Toaster} from "react-hot-toast";
+import {useEffect} from "react";
+import {useRouter} from "next/navigation";
+import {useAuth} from "@/lib/auth";
 
-export default function DashboardLayout({children}:{children:React.ReactNode}){
-  return(
+export default function DashboardLayout({children}:{children:React.ReactNode}) {
+  const {user, loading} = useAuth();
+  const router = useRouter();
+
+  const DEV_BYPASS = process.env.NODE_ENV === "development";
+
+  useEffect(()=>{
+    if (loading) return;
+
+    if (!user && !DEV_BYPASS) {
+      router.replace("/login");
+    }
+  }, [user, loading, router]);
+
+  if (loading) {
+    return null;
+  }
+
+  if (!user && !DEV_BYPASS) {
+    return null;
+  }
+
+  return (
+    // 👇 your existing layout JSX stays EXACTLY the same
+
     <div className="relative flex min-h-screen bg-gray-50 dark:bg-black transition-colors duration-700 overflow-x-hidden min-w-0">
 
 
