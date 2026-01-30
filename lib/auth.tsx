@@ -1,4 +1,4 @@
-// lib/auth.ts
+// lib/auth.tsx
 "use client";
 
 import React, {createContext, useContext, useEffect, useState} from "react";
@@ -8,6 +8,7 @@ import {
   signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   signOut,
   onAuthStateChanged,
   type User,
@@ -58,8 +59,13 @@ export const AuthProvider = ({children}:{children:React.ReactNode})=>{
     await syncUser();
   };
 
-  const signUpWithEmail = async (email:string,password:string)=>{
-    await createUserWithEmailAndPassword(auth,email,password);
+  const signUpWithEmail = async (email:string, password:string)=>{
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+    if (cred.user && !cred.user.emailVerified) {
+      await sendEmailVerification(cred.user);
+    }
+
     await syncUser();
   };
 
