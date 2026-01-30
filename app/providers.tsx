@@ -1,13 +1,29 @@
-'use client';
+"use client";
 
-import {ReactNode} from 'react';
-import {ThemeProvider} from '@/components/providers/ThemeProvider';
-import {Toaster} from 'react-hot-toast';
+import {ReactNode, useEffect, useState} from "react";
+import {ThemeProvider} from "next-themes";
+import {Toaster} from "react-hot-toast";
 
 export default function Providers({children}:{children:ReactNode}){
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(()=>{
+    setMounted(true);
+  },[]);
+
+  if (!mounted) {
+    return null; // ✅ prevents hydration mismatch
+  }
+
   return (
-    <ThemeProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
       {children}
+
       <Toaster
         position="bottom-right"
         toastOptions={{
