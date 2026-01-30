@@ -3,6 +3,8 @@
 import React from 'react';
 import Sidebar from '@/components/shared/Sidebar';
 import Topbar from '@/components/shared/Topbar';
+import DashboardShell from "../DashboardShell";
+
 
 export default function DashboardShell({children}:{children:React.ReactNode}){
   return (

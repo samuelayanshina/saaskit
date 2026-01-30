@@ -1,20 +1,21 @@
 // lib/firebaseAdmin.ts
 import admin from "firebase-admin";
 
-const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-
-if (!serviceAccountJson) {
-  throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON env var");
+if (!process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+  throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON");
 }
-
-const serviceAccount = JSON.parse(serviceAccountJson);
 
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    projectId: serviceAccount.project_id,
+    credential: admin.credential.cert(
+      JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON)
+    ),
   });
 }
 
-export default admin.firestore();
 export const adminAuth = admin.auth();
+export const adminDb = admin.firestore();
+
+export async function verifyFirebaseToken(token:string){
+  return adminAuth.verifyIdToken(token);
+}

@@ -3,14 +3,14 @@
 import {useEffect, useState} from "react";
 import Link from "next/link";
 import BillingList from "./components/BillingList";
+import { getAuth } from "firebase/auth";
+
 
 export default function BillingPage(){
 
   const [billing, setBilling] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Auth placeholder — replace later with your Firebase userId
-  const currentUserId = "USER_ID_FROM_AUTH";
 
   // 🔹 Modal state (for Upgrade/Downgrade later)
   const [openPlanModal, setOpenPlanModal] = useState(false);
@@ -19,25 +19,38 @@ export default function BillingPage(){
   // ⭐ 1. Stripe Customer Portal Logic
   // -------------------------------------------------
   const handleOpenPortal = async()=>{
-    try{
-      const res = await fetch("/api/stripe/create-portal-session", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({userId: currentUserId}),
-      });
+  try{
+    const auth = getAuth();
+    const user = auth.currentUser;
 
-      const json = await res.json();
-
-      if(json?.url){
-        window.location.href = json.url;
-      }else{
-        alert(json?.error || "Could not open billing portal");
-      }
-
-    }catch(err){
-      console.error("Portal error:", err);
+    if(!user){
+      alert("You must be logged in.");
+      return;
     }
-  };
+
+    // 🔐 Get secure ID token
+    const idToken = await user.getIdToken(true);
+
+    // 🔵 Call backend with ID token instead of userId
+    const res = await fetch("/api/stripe/create-portal-session", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ idToken }),
+    });
+
+    const json = await res.json();
+
+    if(json?.url){
+      window.location.href = json.url;
+    }else{
+      alert(json?.error || "Could not open billing portal");
+    }
+
+  }catch(err){
+    console.error("Portal error:", err);
+  }
+};
+
 
   // -------------------------------------------------
   // Load billing list
