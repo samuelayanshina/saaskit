@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
+import React, {useEffect} from "react";
 import Sidebar from "@/components/shared/Sidebar";
 import Topbar from "@/components/shared/Topbar";
 import {Toaster} from "react-hot-toast";
-import {useEffect} from "react";
 import {useRouter} from "next/navigation";
 import {useAuth} from "@/lib/auth";
+
 
 export default function DashboardLayout({children}:{children:React.ReactNode}) {
   const {user, loading} = useAuth();
