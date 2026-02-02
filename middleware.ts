@@ -1,9 +1,16 @@
 import {NextRequest, NextResponse} from "next/server";
 
-export function middleware(req:NextRequest){
+export function middleware(req: NextRequest) {
+  const DEV_FORCE_ACCESS = process.env.NODE_ENV === "development";
+
+  // 🔓 TEMP DEV UNLOCK — bypass auth locally
+  if (DEV_FORCE_ACCESS) {
+    return NextResponse.next();
+  }
+
   const {pathname} = req.nextUrl;
 
-  // Only protect dashboard routes
+  // 🔒 Protect dashboard routes in prod
   if (pathname.startsWith("/dashboard")) {
     const hasAuthCookie =
       req.cookies.get("__session") || // Firebase hosting
