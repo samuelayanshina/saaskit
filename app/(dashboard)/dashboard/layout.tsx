@@ -7,17 +7,17 @@ import {Toaster} from "react-hot-toast";
 import {useRouter} from "next/navigation";
 import {useAuth} from "@/lib/auth";
 
-
 export default function DashboardLayout({children}:{children:React.ReactNode}) {
   const {user, loading} = useAuth();
   const router = useRouter();
 
   const DEV_BYPASS = process.env.NODE_ENV === "development";
+  const DEV_FORCE_ACCESS = true; // 🔓 TEMPORARY DEV SUPER-BYPASS
 
   useEffect(()=>{
     if (loading) return;
 
-    if (!user && !DEV_BYPASS) {
+    if (!user && !DEV_BYPASS && !DEV_FORCE_ACCESS) {
       router.replace("/login");
     }
   }, [user, loading, router]);
@@ -26,15 +26,12 @@ export default function DashboardLayout({children}:{children:React.ReactNode}) {
     return null;
   }
 
-  if (!user && !DEV_BYPASS) {
+  if (!user && !DEV_BYPASS && !DEV_FORCE_ACCESS) {
     return null;
   }
 
   return (
-    // 👇 your existing layout JSX stays EXACTLY the same
-
     <div className="relative flex min-h-screen bg-gray-50 dark:bg-black transition-colors duration-700 overflow-x-hidden min-w-0">
-
 
       {/* ✨ Animated Background Glow */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
