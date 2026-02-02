@@ -3,6 +3,7 @@
 import React, {useEffect, useState} from "react";
 import {ThemeProvider} from "next-themes";
 import {Toaster} from "react-hot-toast";
+import {AuthProvider} from "@/lib/auth";
 
 export default function Providers({children}:{children:React.ReactNode}) {
   const [mounted, setMounted] = useState(false);
@@ -11,7 +12,7 @@ export default function Providers({children}:{children:React.ReactNode}) {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null; // 🔒 prevents hydration mismatch
+  if (!mounted) return null; // prevents hydration mismatch
 
   return (
     <ThemeProvider
@@ -20,7 +21,10 @@ export default function Providers({children}:{children:React.ReactNode}) {
       enableSystem
       disableTransitionOnChange
     >
-      {children}
+      {/* 🔐 AUTH CONTEXT — THIS WAS MISSING */}
+      <AuthProvider>
+        {children}
+      </AuthProvider>
 
       <Toaster
         position="bottom-right"
