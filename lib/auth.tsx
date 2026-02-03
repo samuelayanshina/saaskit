@@ -42,16 +42,25 @@ export const AuthProvider = ({children}:{children:React.ReactNode})=>{
    * Creates Firestore user record if it doesn't exist
    */
   const syncUser = async ()=>{
-    const token = await auth.currentUser?.getIdToken();
-    if (!token) return;
+  const token = await auth.currentUser?.getIdToken();
+  if (!token) return;
 
-    await fetch("/api/auth/sync-user", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  };
+  // 1️⃣ Create session cookie
+  await fetch("/api/auth/session", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({idToken: token}),
+  });
+
+  // 2️⃣ Sync user record (existing)
+  await fetch("/api/auth/sync-user", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 
   const signInWithGoogle = async ()=>{
     const provider = new GoogleAuthProvider();
