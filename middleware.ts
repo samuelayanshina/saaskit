@@ -1,28 +1,31 @@
 import {NextRequest, NextResponse} from "next/server";
+import {adminAuth} from "@/lib/firebaseAdmin";
 
-export function middleware(req: NextRequest) {
-  const DEV_FORCE_ACCESS = process.env.NODE_ENV === "development";
+export async function middleware(req: NextRequest) {
+  const {pathname} = req.nextUrl;
 
-  // 🔓 TEMP DEV UNLOCK — bypass auth locally
-  if (DEV_FORCE_ACCESS) {
+  // Only protect dashboard routes
+  if (!pathname.startsWith("/dashboard")) {
     return NextResponse.next();
   }
 
-  const {pathname} = req.nextUrl;
+  // Accept both cookie names (no breakage)
+  const sessionCookie =
+    req.cookies.get("_session")?.value ||
+    req.cookies.get("__session")?.value;
 
-  // 🔒 Protect dashboard routes in prod
-  if (pathname.startsWith("/dashboard")) {
-    const hasAuthCookie =
-      req.cookies.get("__session") || // Firebase hosting
-      req.cookies.get("session");     // Custom session (future)
-
-    if (!hasAuthCookie) {
-      const loginUrl = new URL("/login", req.url);
-      return NextResponse.redirect(loginUrl);
-    }
+  if (!sessionCookie) {
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  return NextResponse.next();
+  try {
+    // 🔐 REAL verification (production-grade)
+    await adminAuth.verifySessionCookie(sessionCookie, true);
+
+    return NextResponse.next();
+  } catch {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
 }
 
 export const config = {
