@@ -1,19 +1,15 @@
 import {NextRequest, NextResponse} from "next/server";
-import {verifyFirebaseToken} from "@/lib/firebaseAdmin";
+import {requireUser} from "@/lib/serverAuth";
 
-export async function GET(req:NextRequest){
-  const authHeader = req.headers.get("authorization");
-
-  if (!authHeader?.startsWith("Bearer ")) {
-    return NextResponse.json({error:"Unauthorized"},{status:401});
-  }
-
+export async function GET(req: NextRequest) {
   try {
-    const token = authHeader.split(" ")[1];
-    const decoded = await verifyFirebaseToken(token);
+    const user = await requireUser(req);
 
-    return NextResponse.json({uid:decoded.uid});
+    return NextResponse.json({
+      uid: user.uid,
+      email: user.email,
+    });
   } catch {
-    return NextResponse.json({error:"Invalid token"},{status:401});
+    return NextResponse.json({error: "Unauthorized"}, {status: 401});
   }
 }
